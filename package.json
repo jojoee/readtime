@@ -1,5 +1,5 @@
 {
-  "name": "readtime",
+  "name": "@jojoee/readtime",
   "version": "0.0.0-development",
   "description": "A lightweight reading-time estimator for plain text and HTML article fragments",
   "keywords": [
@@ -34,6 +34,9 @@
     "dist",
     "src"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "npm run build:esm && npm run build:cjs && npm run build:umd && npm run build:types",
     "build:esm": "esbuild src/index.ts --bundle --format=esm --platform=node --outfile=dist/esm/index.js",

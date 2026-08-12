@@ -5,7 +5,7 @@ A lightweight, Medium-style reading-time estimator for plain text and HTML artic
 ## Installation
 
 ```bash
-npm install readtime
+npm install @jojoee/readtime
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install readtime
 ### ESM / TypeScript
 
 ```typescript
-import { readtime } from 'readtime'
+import { readtime } from '@jojoee/readtime'
 
 readtime('A short article') // 1
 readtime('<p>An HTML article</p>') // 1
@@ -22,7 +22,7 @@ readtime('<p>An HTML article</p>') // 1
 ### CommonJS
 
 ```javascript
-const { readtime } = require('readtime')
+const { readtime } = require('@jojoee/readtime')
 
 readtime('A short article') // 1
 ```
@@ -30,7 +30,7 @@ readtime('A short article') // 1
 ### Browser
 
 ```html
-<script src="https://unpkg.com/readtime/dist/readtime.umd.js"></script>
+<script src="https://unpkg.com/@jojoee/readtime/dist/readtime.umd.js"></script>
 <script>
   readtime.readtime('<p>An HTML article</p>') // 1
 </script>
