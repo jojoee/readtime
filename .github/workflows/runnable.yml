@@ -1,0 +1,25 @@
+name: runnable
+
+on: [push, pull_request]
+
+jobs:
+  runnable:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x, 24.x]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - name: Test CommonJS import
+        run: node --eval "const { readtime } = require('./dist/cjs/index.cjs'); if (readtime('hello') !== 1) process.exit(1)"
+      - name: Test ESM import
+        run: node --input-type=module --eval "import { readtime } from './dist/esm/index.js'; if (readtime('hello') !== 1) process.exit(1)"
+      - name: Test UMD global
+        run: node --eval "const fs = require('node:fs'); const vm = require('node:vm'); const context = { atob, TextDecoder }; vm.runInNewContext(fs.readFileSync('./dist/readtime.umd.js', 'utf8'), context); if (context.readtime.readtime('hello') !== 1) process.exit(1)"
