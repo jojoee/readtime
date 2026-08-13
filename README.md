@@ -36,6 +36,11 @@ readtime('A short article') // 1
 </script>
 ```
 
+## Demo
+
+Open [`demo/index.html`](demo/index.html) in a modern browser to try raw text
+and HTML fragments with the published `@jojoee/readtime@1.0.1` bundle.
+
 ## API
 
 ### `readtime(input: string): number`

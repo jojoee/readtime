@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>readtime demo</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, sans-serif;
+    }
+
+    body {
+      background: Canvas;
+      color: CanvasText;
+      margin: 0;
+    }
+
+    main {
+      margin: 0 auto;
+      max-width: 48rem;
+      padding: 2rem 1rem;
+    }
+
+    h1 {
+      margin-bottom: 0.25rem;
+    }
+
+    .intro {
+      margin-top: 0;
+    }
+
+    .input-header,
+    .result {
+      align-items: center;
+      display: flex;
+      gap: 1rem;
+      justify-content: space-between;
+    }
+
+    textarea {
+      box-sizing: border-box;
+      font: 0.9rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+      margin-top: 0.75rem;
+      min-height: 20rem;
+      padding: 0.75rem;
+      resize: vertical;
+      width: 100%;
+    }
+
+    .result {
+      border-top: 1px solid GrayText;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+    }
+
+    output {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    .hint {
+      color: GrayText;
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 32rem) {
+      .input-header,
+      .result {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>readtime demo</h1>
+    <p class="intro">Paste raw text or an HTML fragment to estimate its reading time.</p>
+
+    <section aria-labelledby="input-label">
+      <div class="input-header">
+        <div>
+          <strong>Article input</strong>
+          <div class="hint"><label id="input-label" for="input">Raw text or HTML. Every sample is at least two minutes.</label></div>
+        </div>
+        <button id="random" type="button">Random sample</button>
+      </div>
+      <textarea id="input" aria-describedby="input-label"><article>
+  <h2>A small HTML article</h2>
+  <p>This prefilled sample shows that markup is ignored when estimating reading time. It contains enough visible text to estimate more than one minute of reading.</p>
+  <p>Use the Random sample button to try a fresh raw-text or HTML article. Each generated example contains at least two hundred and one visible words.</p>
+  <p>Reading time estimates give readers a quick way to judge whether an article fits the time they have available. A clear estimate lets someone choose whether to begin immediately, save the article for later, or share it with a colleague who might find it useful.</p>
+  <p>This paragraph adds a little more natural article structure. It demonstrates that headings, paragraphs, punctuation, entities, and other markup do not become words themselves. Only the visible text contributes to the final whole-minute estimate.</p>
+  <p>A small demo should make the underlying behavior easy to explore. Replace this content, paste a fragment from another page, or generate another sample. The result updates after a short pause while typing and immediately after choosing a random article.</p>
+  <p>Useful examples have enough length to show how rounding affects a result. A short note and a long investigation are not treated the same way, because readers need different amounts of time to absorb their ideas, compare evidence, and consider the conclusions.</p>
+  <p>The generated text is deliberately ordinary prose instead of a special fixture. That keeps the demo approachable while still exercising the same parser and Unicode word segmentation that callers use in their own applications, documentation sites, newsletters, and article pages.</p>
+  <p>Try changing a few sentences, adding your own markup, or pasting a longer draft. The estimate remains a whole number of minutes, so a reader can scan the result quickly. This sample now has more than two hundred visible words before any interaction occurs.</p>
+</article></textarea>
+    </section>
+
+    <section class="result" aria-labelledby="result-label">
+      <span id="result-label">Estimated reading time</span>
+      <output id="result" aria-live="polite"></output>
+    </section>
+  </main>
+
+  <script src="https://unpkg.com/@jojoee/readtime@1.0.1/dist/readtime.umd.js"></script>
+  <script>
+    const input = document.getElementById('input')
+    const random = document.getElementById('random')
+    const result = document.getElementById('result')
+    const debounceDelay = 150
+    let updateTimer
+
+    const words = [
+      'article', 'reader', 'story', 'idea', 'detail', 'example', 'moment', 'writer',
+      'library', 'estimate', 'content', 'language', 'paragraph', 'question', 'answer',
+      'thoughtful', 'practical', 'useful', 'curious', 'clear', 'simple', 'important'
+    ]
+
+    function randomWord () {
+      return words[Math.floor(Math.random() * words.length)]
+    }
+
+    function randomSentence () {
+      const length = 8 + Math.floor(Math.random() * 8)
+      const sentence = Array.from({ length }, randomWord).join(' ')
+      return `${sentence.charAt(0).toUpperCase()}${sentence.slice(1)}.`
+    }
+
+    function generateArticle () {
+      const paragraphs = Array.from({ length: 18 }, () =>
+        Array.from({ length: 2 }, randomSentence).join(' ')
+      )
+      const excludedContent = '<scr' + 'ipt>const ignored = "These words are not counted"</scr' + 'ipt><style>.ignored { display: none; }</style>'
+
+      if (Math.random() < 0.5) return paragraphs.join('\n\n')
+
+      return `<article><h2>${randomSentence()}</h2>${paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join('')}${excludedContent}</article>`
+    }
+
+    function updateResult () {
+      if (typeof globalThis.readtime?.readtime !== 'function') {
+        result.textContent = 'Unable to load readtime'
+        return
+      }
+
+      const minutes = globalThis.readtime.readtime(input.value)
+      result.textContent = `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`
+    }
+
+    input.addEventListener('input', () => {
+      window.clearTimeout(updateTimer)
+      updateTimer = window.setTimeout(updateResult, debounceDelay)
+    })
+
+    random.addEventListener('click', () => {
+      input.value = generateArticle()
+      window.clearTimeout(updateTimer)
+      updateResult()
+    })
+
+    updateResult()
+  </script>
+</body>
+</html>
